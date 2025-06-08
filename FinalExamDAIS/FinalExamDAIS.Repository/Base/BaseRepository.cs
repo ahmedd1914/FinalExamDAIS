@@ -7,14 +7,36 @@ using FinalExamDAIS.Repository.Helpers;
 
 namespace FinalExamDAIS.Repository.Base
 {
-    public abstract class BaseRepository<TObj>
+    public abstract class BaseRepository<TObj, TFilter, TUpdate> : IBaseRepository<TObj, TFilter, TUpdate>
+        where TObj : class
     {
+        protected readonly string _connectionString;
+
+        protected BaseRepository(string connectionString)
+        {
+            _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        }
+
         protected abstract string GetTableName();
         protected abstract string[] GetColumns();
         protected abstract TObj MapEntity(SqlDataReader reader);
         protected virtual string GetIdColumnName() => "Id";
 
-        protected async Task<int> CreateAsync(TObj entity, string idDbFieldEnumeratorName = null)
+        protected async Task<SqlConnection> CreateConnectionAsync()
+        {
+            var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+            return connection;
+        }
+
+        public abstract Task<int> CreateAsync(TObj entity);
+        public abstract Task<TObj> RetrieveAsync(int objectId);
+        public abstract IAsyncEnumerable<TObj> RetrieveCollectionAsync(TFilter filter);
+        public abstract Task<bool> UpdateAsync(int objectId, TUpdate update);
+        public abstract Task<bool> DeleteAsync(int objectId);
+
+        // Helper methods for derived classes
+        protected async Task<int> CreateEntityAsync(TObj entity, string idDbFieldEnumeratorName = null)
         {
             try
             {
@@ -29,7 +51,7 @@ namespace FinalExamDAIS.Repository.Base
                 var sqlParams = properties.Select(p => 
                     SqlQueryHelper.CreateParameter(p.Name, p.GetValue(entity))).ToArray();
 
-                return await SqlQueryHelper.ExecuteScalarAsync<int>(query, sqlParams);
+                return await SqlQueryHelper.ExecuteScalarAsync<int>(query, sqlParams, _connectionString);
             }
             catch (Exception ex)
             {
@@ -37,7 +59,7 @@ namespace FinalExamDAIS.Repository.Base
             }
         }
 
-        protected async Task<TObj> RetrieveAsync(string idDbFieldName, int idDbFieldValue)
+        protected async Task<TObj> RetrieveEntityAsync(string idDbFieldName, int idDbFieldValue)
         {
             try
             {
@@ -45,7 +67,7 @@ namespace FinalExamDAIS.Repository.Base
                 var query = SqlQueryHelper.BuildSelectByIdQuery(columns, GetTableName(), idDbFieldName);
                 var parameter = SqlQueryHelper.CreateParameter(idDbFieldName, idDbFieldValue);
 
-                using var reader = await SqlQueryHelper.ExecuteReaderAsync(query, new[] { parameter });
+                using var reader = await SqlQueryHelper.ExecuteReaderAsync(query, new[] { parameter }, _connectionString);
                 
                 if (!reader.Read())
                 {
@@ -61,7 +83,7 @@ namespace FinalExamDAIS.Repository.Base
             }
         }
 
-        protected async Task<List<TObj>> RetrieveCollectionAsync(Filter filter = null)
+        protected async Task<List<TObj>> RetrieveEntitiesAsync(Filter filter = null)
         {
             try
             {
@@ -78,7 +100,7 @@ namespace FinalExamDAIS.Repository.Base
                 }
 
                 var results = new List<TObj>();
-                using var reader = await SqlQueryHelper.ExecuteReaderAsync(query, parameters.ToArray());
+                using var reader = await SqlQueryHelper.ExecuteReaderAsync(query, parameters.ToArray(), _connectionString);
                 while (await reader.ReadAsync())
                 {
                     results.Add(MapEntity(reader));
@@ -91,9 +113,9 @@ namespace FinalExamDAIS.Repository.Base
             }
         }
 
-        protected async Task<bool> DeleteAsync(string idDbFieldName, int idDbFieldValue)
+        protected async Task<bool> DeleteEntityAsync(string idDbFieldName, int idDbFieldValue)
         {
-            using var connection = await ConnectionFactory.CreateConnectionAsync();
+            using var connection = await CreateConnectionAsync();
             using var transaction = connection.BeginTransaction();
             
             try
@@ -101,7 +123,7 @@ namespace FinalExamDAIS.Repository.Base
                 var query = SqlQueryHelper.BuildDeleteQuery(GetTableName(), idDbFieldName);
                 var parameter = SqlQueryHelper.CreateParameter(idDbFieldName, idDbFieldValue);
 
-                var rowsAffected = await SqlQueryHelper.ExecuteNonQueryAsync(query, new[] { parameter });
+                var rowsAffected = await SqlQueryHelper.ExecuteNonQueryAsync(query, new[] { parameter }, _connectionString);
                 transaction.Commit();
                 return rowsAffected > 0;
             }

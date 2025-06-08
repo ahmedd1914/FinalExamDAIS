@@ -1,9 +1,13 @@
+using FinalExamDAIS.Services.DTOs;
+
 namespace FinalExamDAIS.Services.DTOs.Authentication
 {
-    public class LoginResponse
+    public class LoginResponse : BaseResponse<UserInfo>
     {
-        public bool Success { get; set; }
-        public string Message { get; set; }
-        public UserInfo UserInfo { get; set; }
-}
+        public UserInfo UserInfo 
+        { 
+            get => Data; 
+            set => Data = value; 
+        }
+    }
 }

@@ -11,7 +11,7 @@ namespace FinalExamDAIS.Web.Controllers
     {
         private readonly AuthService _authService;
 
-        public AccountController(AuthService authService, ILogger<AccountController> logger) : base(logger)
+        public AccountController(AuthService authService)
         {
             _authService = authService;
         }
@@ -34,7 +34,7 @@ namespace FinalExamDAIS.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading login page");
+               
                 return View("Error");
             }
         }
@@ -67,7 +67,7 @@ namespace FinalExamDAIS.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during login attempt");
+               
                 ViewData["ErrorMessage"] = "An error occurred during login. Please try again.";
                 return View(model);
             }
@@ -88,7 +88,7 @@ namespace FinalExamDAIS.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading registration page");
+               
                 return View("Error");
             }
         }
@@ -125,7 +125,7 @@ namespace FinalExamDAIS.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during registration attempt");
+               
                 ViewData["ErrorMessage"] = "An error occurred during registration. Please try again.";
                 return View(model);
             }
@@ -140,7 +140,7 @@ namespace FinalExamDAIS.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during logout");
+               
                 return RedirectToAction("Login");
             }
         }

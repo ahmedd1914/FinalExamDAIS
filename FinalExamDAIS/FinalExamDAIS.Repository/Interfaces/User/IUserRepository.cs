@@ -9,5 +9,7 @@ namespace FinalExamDAIS.Repository.Interfaces.User
 {
     public interface IUserRepository : IBaseRepository<Models.User, UserFilter, UserUpdate>
     {
+        Task<Models.User> GetByEmailAsync(string email);
+        Task<bool> UpdatePasswordAsync(int userId, string newPasswordHash);
     }
 }

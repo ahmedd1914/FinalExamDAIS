@@ -9,10 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-ConnectionFactory.Initialize(connectionString);
+
+// Register connection string for dependency injection
+builder.Services.AddSingleton(connectionString);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 

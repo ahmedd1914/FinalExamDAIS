@@ -11,12 +11,14 @@ namespace FinalExamDAIS.Repository.Helpers
         private readonly string _tableName;
         private readonly string _idColumn;
         private readonly int _idValue;
+        private readonly string _connectionString;
 
-        public UpdateCommand(string tableName, string idColumn, int idValue)
+        public UpdateCommand(string tableName, string idColumn, int idValue, string connectionString)
         {
             _tableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
             _idColumn = idColumn ?? throw new ArgumentNullException(nameof(idColumn));
             _idValue = idValue;
+            _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
         public UpdateCommand AddUpdate(string column, object value)
@@ -43,12 +45,13 @@ namespace FinalExamDAIS.Repository.Helpers
             }
             parameters.Add(SqlQueryHelper.CreateParameter(_idColumn, _idValue));
 
-            using var connection = await ConnectionFactory.CreateConnectionAsync();
+            using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
             using var transaction = connection.BeginTransaction();
 
             try
             {
-                var rowsAffected = await SqlQueryHelper.ExecuteNonQueryAsync(query, parameters.ToArray());
+                var rowsAffected = await SqlQueryHelper.ExecuteNonQueryAsync(query, parameters.ToArray(), _connectionString);
                 transaction.Commit();
                 return rowsAffected > 0;
             }

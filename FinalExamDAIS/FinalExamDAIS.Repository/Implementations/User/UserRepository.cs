@@ -10,9 +10,13 @@ using FinalExamDAIS.Repository.Interfaces.User;
 
 namespace FinalExamDAIS.Repository.Implementations.User
 {
-    public class UserRepository : BaseRepository<Models.User>, IUserRepository
+    public class UserRepository : BaseRepository<Models.User, UserFilter, UserUpdate>, IUserRepository
     {
         private const string IdDbFieldName = "UserId";
+
+        public UserRepository(string connectionString) : base(connectionString)
+        {
+        }
 
         protected override string GetTableName() => "Users";
 
@@ -45,10 +49,40 @@ namespace FinalExamDAIS.Repository.Implementations.User
             };
         }
 
+        public override async Task<int> CreateAsync(Models.User entity)
+        {
+            return await base.CreateEntityAsync(entity, IdDbFieldName);
+        }
+
+        public override async Task<Models.User> RetrieveAsync(int objectId)
+        {
+            return await base.RetrieveEntityAsync(IdDbFieldName, objectId);
+        }
+
+        public override async IAsyncEnumerable<Models.User> RetrieveCollectionAsync(UserFilter filter)
+        {
+            var users = await base.RetrieveEntitiesAsync(filter?.ToFilter());
+            foreach (var user in users)
+            {
+                yield return user;
+            }
+        }
+
+        public override async Task<bool> UpdateAsync(int objectId, UserUpdate update)
+        {
+            var command = update.ToUpdateCommand(GetTableName(), objectId, _connectionString);
+            return await command.ExecuteAsync();
+        }
+
+        public override async Task<bool> DeleteAsync(int objectId)
+        {
+            return await base.DeleteEntityAsync(IdDbFieldName, objectId);
+        }
+
         public async Task<Models.User> GetByEmailAsync(string email)
         {
             var filter = new Filter().AddCondition("Email", email);
-            var users = await RetrieveCollectionAsync(filter);
+            var users = await RetrieveEntitiesAsync(filter);
             return users.FirstOrDefault();
         }
 
@@ -56,36 +90,6 @@ namespace FinalExamDAIS.Repository.Implementations.User
         {
             var update = new UserUpdate { Password = new SqlString(newPasswordHash) };
             return await UpdateAsync(userId, update);
-        }
-
-        public async Task<int> CreateAsync(Models.User entity)
-        {
-            return await base.CreateAsync(entity, IdDbFieldName);
-        }
-
-        public async Task<Models.User> RetrieveAsync(int objectId)
-        {
-            return await base.RetrieveAsync(IdDbFieldName, objectId);
-        }
-
-        public async IAsyncEnumerable<Models.User> RetrieveCollectionAsync(UserFilter filter)
-        {
-            var users = await base.RetrieveCollectionAsync(filter.ToFilter());
-            foreach (var user in users)
-            {
-                yield return user;
-            }
-        }
-
-        public async Task<bool> UpdateAsync(int objectId, UserUpdate update)
-        {
-            var command = update.ToUpdateCommand(GetTableName(), objectId);
-            return await command.ExecuteAsync();
-        }
-
-        public async Task<bool> DeleteAsync(int objectId)
-        {
-            return await base.DeleteAsync(IdDbFieldName, objectId);
         }
     }
 }

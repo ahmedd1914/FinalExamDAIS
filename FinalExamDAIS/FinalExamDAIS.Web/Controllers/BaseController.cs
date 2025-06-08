@@ -5,11 +5,11 @@ namespace FinalExamDAIS.Web.Controllers
 {
     public abstract class BaseController : Controller
     {
-        protected readonly ILogger _logger;
+      
 
-        protected BaseController(ILogger logger)
+        protected BaseController()
         {
-            _logger = logger;
+
         }
 
         protected int? GetUserId()
@@ -22,7 +22,6 @@ namespace FinalExamDAIS.Web.Controllers
             var userId = GetUserId();
             if (!userId.HasValue)
             {
-                _logger.LogWarning("No user ID found in session");
                 return RedirectToAction("Login", "Account");
             }
             return null;
@@ -33,7 +32,6 @@ namespace FinalExamDAIS.Web.Controllers
             var userId = GetUserId();
             if (!userId.HasValue || userId.Value != requestedUserId)
             {
-                _logger.LogWarning("User ID mismatch or not found in session");
                 return RedirectToAction("Login", "Account");
             }
             return null;

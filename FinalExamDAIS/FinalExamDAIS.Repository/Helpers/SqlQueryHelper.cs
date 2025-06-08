@@ -95,11 +95,12 @@ namespace FinalExamDAIS.Repository.Helpers
             return string.Join(", ", setClauses);
         }
 
-        public static async Task<T> ExecuteScalarAsync<T>(string query, SqlParameter[] parameters = null)
+        public static async Task<T> ExecuteScalarAsync<T>(string query, SqlParameter[] parameters = null, string connectionString = null)
         {
             if (string.IsNullOrWhiteSpace(query)) throw new ArgumentException("Query cannot be empty", nameof(query));
 
-            using var connection = await ConnectionFactory.CreateConnectionAsync();
+            using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
             using var command = new SqlCommand(query, connection);
             
             if (parameters != null)
@@ -118,11 +119,12 @@ namespace FinalExamDAIS.Repository.Helpers
             }
         }
 
-        public static async Task<int> ExecuteNonQueryAsync(string query, SqlParameter[] parameters = null)
+        public static async Task<int> ExecuteNonQueryAsync(string query, SqlParameter[] parameters = null, string connectionString = null)
         {
             if (string.IsNullOrWhiteSpace(query)) throw new ArgumentException("Query cannot be empty", nameof(query));
 
-            using var connection = await ConnectionFactory.CreateConnectionAsync();
+            using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
             using var command = new SqlCommand(query, connection);
             
             if (parameters != null)
@@ -140,11 +142,12 @@ namespace FinalExamDAIS.Repository.Helpers
             }
         }
 
-        public static async Task<SqlDataReader> ExecuteReaderAsync(string query, SqlParameter[] parameters = null)
+        public static async Task<SqlDataReader> ExecuteReaderAsync(string query, SqlParameter[] parameters = null, string connectionString = null)
         {
             if (string.IsNullOrWhiteSpace(query)) throw new ArgumentException("Query cannot be empty", nameof(query));
 
-            var connection = await ConnectionFactory.CreateConnectionAsync();
+            var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
             var command = new SqlCommand(query, connection);
             
             if (parameters != null)
