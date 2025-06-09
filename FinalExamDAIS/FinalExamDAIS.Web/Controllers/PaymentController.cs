@@ -8,6 +8,7 @@ using FinalExamDAIS.Services.DTOs.Payment;
 using System.Diagnostics;
 using FinalExamDAIS.Web.Attributes;
 using FinalExamDAIS.Models.Enums;
+using FinalExamDAIS.Repository.Interfaces.User;
 
 namespace FinalExamDAIS.Web.Controllers
 {
@@ -16,11 +17,16 @@ namespace FinalExamDAIS.Web.Controllers
     {
         private readonly IPaymentService _paymentService;
         private readonly IAccountService _accountService;
+        private readonly IUserRepository _userRepository;
 
-        public PaymentController(IPaymentService paymentService, IAccountService accountService)
+        public PaymentController(
+            IPaymentService paymentService, 
+            IAccountService accountService,
+            IUserRepository userRepository)
         {
             _paymentService = paymentService;
             _accountService = accountService;
+            _userRepository = userRepository;
         }
 
         public async Task<IActionResult> Index(string sortBy = "date")
@@ -85,7 +91,7 @@ namespace FinalExamDAIS.Web.Controllers
                 ViewBag.Accounts = accounts.Accounts.Select(a => new AccountViewModel
                 {
                     AccountId = a.AccountId,
-                    AccountNumber = a.AccountNumber,
+                    AccountNumber = $"{a.AccountNumber} - {a.AvailableAmount.ToString("N2")} лв.",
                     AvailableAmount = a.AvailableAmount,
                     IsActive = a.IsActive
                 }).ToList();
@@ -117,7 +123,7 @@ namespace FinalExamDAIS.Web.Controllers
                     ViewBag.Accounts = accounts.Accounts.Select(a => new AccountViewModel
                     {
                         AccountId = a.AccountId,
-                        AccountNumber = a.AccountNumber,
+                        AccountNumber = $"{a.AccountNumber} - {a.AvailableAmount.ToString("N2")} лв.",
                         AvailableAmount = a.AvailableAmount,
                         IsActive = a.IsActive
                     }).ToList();
@@ -141,7 +147,7 @@ namespace FinalExamDAIS.Web.Controllers
                     ViewBag.Accounts = accounts.Accounts.Select(a => new AccountViewModel
                     {
                         AccountId = a.AccountId,
-                        AccountNumber = a.AccountNumber,
+                        AccountNumber = $"{a.AccountNumber} - {a.AvailableAmount.ToString("N2")} лв.",
                         AvailableAmount = a.AvailableAmount,
                         IsActive = a.IsActive
                     }).ToList();
@@ -206,6 +212,58 @@ namespace FinalExamDAIS.Web.Controllers
                 { 
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = "Възникна грешка при отхвърляне на плащането. Моля, опитайте отново."
+                });
+            }
+        }
+
+        public async Task<IActionResult> Details(int paymentId)
+        {
+            try 
+            {
+                var requiredUserId = RequireUserId();
+                if (requiredUserId != null) return requiredUserId;
+
+                var userId = GetUserId().Value;
+                var payment = await _paymentService.GetPaymentByIdAsync(paymentId);
+                
+                if (payment == null)
+                {
+                    return View("Error", new ErrorViewModel 
+                    { 
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                        Message = "Плащането не е намерено."
+                    });
+                }
+
+                // Get account numbers for display
+                var accounts = await _accountService.GetAccountsByUserIdAsync(userId);
+                var accountNumbers = accounts.Accounts.ToDictionary(a => a.AccountId, a => a.AccountNumber);
+
+                // Get user information
+                var user = await _userRepository.RetrieveAsync(payment.CreatedByUserId);
+                var username = user?.Username ?? "Unknown User";
+
+                var viewModel = new PaymentDetailsViewModel
+                {
+                    PaymentId = payment.PaymentId,
+                    FromAccountNumber = accountNumbers.GetValueOrDefault(payment.FromAccountId, "Unknown"),
+                    ToAccountNumber = payment.ToAccountNumber,
+                    Amount = payment.Amount,
+                    Reason = payment.Reason,
+                    Status = payment.Status,
+                    CreatedDate = payment.CreatedDate,
+                    ProcessedDate = payment.ProcessedDate,
+                    CreatedByUser = username
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel 
+                { 
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = "Възникна грешка при зареждане на детайлите на плащането. Моля, опитайте отново."
                 });
             }
         }

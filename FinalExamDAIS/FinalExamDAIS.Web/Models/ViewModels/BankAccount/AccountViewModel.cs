@@ -14,5 +14,7 @@ namespace FinalExamDAIS.Web.Models.ViewModels.Account
         
         [Display(Name = "Активен")]
         public bool IsActive { get; set; }
+
+        public string AccountNumberWithBalance => $"{AccountNumber} - {AvailableAmount.ToString("N2")} лв.";
     }
 } 

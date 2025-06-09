@@ -67,62 +67,64 @@
                 {
                     <div class="col-12 col-md-6 col-lg-4">
                         <div class="payment-card h-100 modern-card d-flex flex-column">
-                            <div class="card-body p-4 d-flex flex-column h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="payment-amount">
-                                        <span class="amount-label"><i class="fas fa-coins me-1"></i>Сума</span>
-                                        <h3 class="amount-value mb-0">@payment.Amount.ToString("N2") лв.</h3>
-                                    </div>
-                                    <span class="status-badge @GetStatusClass(payment.Status)">
-                                        <i class="fas @(payment.Status == nameof(PaymentStatus.Pending) ? "fa-clock" : 
-                                                     payment.Status == nameof(PaymentStatus.Processed) ? "fa-check-circle" : 
-                                                     "fa-times-circle") me-2"></i>
-                                        @GetStatusText(payment.Status)
-                                    </span>
-                                </div>
-
-                                <div class="payment-details">
-                                    <div class="detail-item">
-                                        <span class="detail-label"><i class="fas fa-arrow-up-right-from-square me-1"></i>От акаунт</span>
-                                        <span class="detail-value">@payment.FromAccountNumber</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label"><i class="fas fa-arrow-down-left-from-square me-1"></i>Към акаунт</span>
-                                        <span class="detail-value">@payment.ToAccountNumber</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label"><i class="fas fa-comment-dots me-1"></i>Причина</span>
-                                        <span class="detail-value">@payment.Reason</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label"><i class="fas fa-calendar-plus me-1"></i>Дата на създаване</span>
-                                        <span class="detail-value">@payment.CreatedDate.ToString("dd.MM.yyyy HH:mm")</span>
-                                    </div>
-                                    @if (payment.ProcessedDate.HasValue)
-                                    {
-                                        <div class="detail-item">
-                                            <span class="detail-label"><i class="fas fa-calendar-check me-1"></i>Дата на обработка</span>
-                                            <span class="detail-value">@payment.ProcessedDate.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                            <a href="@Url.Action("Details", "Payment", new { paymentId = payment.PaymentId })" class="card-content-link">
+                                <div class="card-body p-4 d-flex flex-column h-100">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="payment-amount">
+                                            <span class="amount-label"><i class="fas fa-coins me-1"></i>Сума</span>
+                                            <h3 class="amount-value mb-0">@payment.Amount.ToString("N2") лв.</h3>
                                         </div>
-                                    }
-                                </div>
-
-                                @if (payment.Status == nameof(PaymentStatus.Pending))
-                                {
-                                    <div class="d-flex gap-2 mt-4 button-row mt-auto">
-                                        <a asp-action="ProcessPayment" asp-route-paymentId="@payment.PaymentId" 
-                                           class="btn btn-success action-btn btn-sm flex-grow-1 same-size-btn" 
-                                           onclick="return confirm('Сигурни ли сте, че искате да обработите това плащане?')">
-                                            <i class="fas fa-check me-2"></i>Обработи
-                                        </a>
-                                        <a asp-action="RejectPayment" asp-route-paymentId="@payment.PaymentId" 
-                                           class="btn btn-danger action-btn btn-sm flex-grow-1 same-size-btn" 
-                                           onclick="return confirm('Сигурни ли сте, че искате да отхвърлите това плащане?')">
-                                            <i class="fas fa-times me-2"></i>Отхвърли
-                                        </a>
+                                        <span class="status-badge @GetStatusClass(payment.Status)">
+                                            <i class="fas @(payment.Status == nameof(PaymentStatus.Pending) ? "fa-clock" : 
+                                                         payment.Status == nameof(PaymentStatus.Processed) ? "fa-check-circle" : 
+                                                         "fa-times-circle") me-2"></i>
+                                            @GetStatusText(payment.Status)
+                                        </span>
                                     </div>
-                                }
-                            </div>
+
+                                    <div class="payment-details">
+                                        <div class="detail-item">
+                                            <span class="detail-label"><i class="fas fa-arrow-up-right-from-square me-1"></i>От акаунт</span>
+                                            <span class="detail-value">@payment.FromAccountNumber</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label"><i class="fas fa-arrow-down-left-from-square me-1"></i>Към акаунт</span>
+                                            <span class="detail-value">@payment.ToAccountNumber</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label"><i class="fas fa-comment-dots me-1"></i>Причина</span>
+                                            <span class="detail-value">@payment.Reason</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label"><i class="fas fa-calendar-plus me-1"></i>Дата на създаване</span>
+                                            <span class="detail-value">@payment.CreatedDate.ToString("dd.MM.yyyy HH:mm")</span>
+                                        </div>
+                                        @if (payment.ProcessedDate.HasValue)
+                                        {
+                                            <div class="detail-item">
+                                                <span class="detail-label"><i class="fas fa-calendar-check me-1"></i>Дата на обработка</span>
+                                                <span class="detail-value">@payment.ProcessedDate.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </a>
+
+                            @if (payment.Status == nameof(PaymentStatus.Pending))
+                            {
+                                <div class="d-flex gap-2 mt-4 button-row mt-auto">
+                                    <a asp-action="ProcessPayment" asp-route-paymentId="@payment.PaymentId" 
+                                       class="btn btn-success action-btn btn-sm flex-grow-1 same-size-btn" 
+                                       onclick="return confirm('Сигурни ли сте, че искате да обработите това плащане?')">
+                                        <i class="fas fa-check me-2"></i>Обработи
+                                    </a>
+                                    <a asp-action="RejectPayment" asp-route-paymentId="@payment.PaymentId" 
+                                       class="btn btn-danger action-btn btn-sm flex-grow-1 same-size-btn" 
+                                       onclick="return confirm('Сигурни ли сте, че искате да отхвърлите това плащане?')">
+                                        <i class="fas fa-times me-2"></i>Отхвърли
+                                    </a>
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -430,6 +432,39 @@
             font-size: 0.95rem;
             padding: 0.5rem 0.75rem;
             border-radius: 10px;
+        }
+
+        .card-content-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .card-content-link:hover {
+            color: inherit;
+        }
+
+        .payment-card {
+            position: relative;
+        }
+
+        .payment-card .button-row {
+            position: relative;
+            z-index: 2;
+            background: white;
+            padding: 1rem;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .payment-card .card-body {
+            position: relative;
+            z-index: 1;
+        }
+
+        .payment-card:hover .card-body {
+            background: rgba(110, 142, 251, 0.02);
         }
     </style>
 } 
