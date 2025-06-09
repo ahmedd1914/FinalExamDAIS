@@ -51,17 +51,7 @@ namespace FinalExamDAIS.Services.Implementations.Payment
             }
 
             var fromAccount = await _accountRepository.RetrieveAsync(createPaymentDto.FromAccountId);
-            if (fromAccount == null)
-            {
-                return new PaymentInfo { Success = false, Message = "Акаунтът не е намерен" };
-            }
-
-            if (!fromAccount.IsActive)
-            {
-                return new PaymentInfo { Success = false, Message = "Акаунтът не е активен" };
-            }
-
-            if (fromAccount.AccountNumber == createPaymentDto.ToAccountNumber)
+            if (fromAccount?.AccountNumber == createPaymentDto.ToAccountNumber)
             {
                 return new PaymentInfo { Success = false, Message = "Не може да изпратите плащане към същия акаунт" };
             }
@@ -161,17 +151,6 @@ namespace FinalExamDAIS.Services.Implementations.Payment
             {
                 return new PaymentInfo { Success = false, Message = "Недостатъчна наличност по акаунта" };
             }
-    
-            var toAccount = await _accountRepository.GetAccountByNumberAsync(payment.ToAccountNumber);
-            if (toAccount == null)
-            {
-                return new PaymentInfo { Success = false, Message = "Получателят не е намерен" };
-            }
-
-            if (!toAccount.IsActive)
-            {
-                return new PaymentInfo { Success = false, Message = "Акаунтът на получателя не е активен" };
-            }
 
             fromAccount.AvailableAmount -= payment.Amount;
             var fromAccountUpdate = new AccountUpdate { AvailableAmount = fromAccount.AvailableAmount };
@@ -181,14 +160,22 @@ namespace FinalExamDAIS.Services.Implementations.Payment
                 return new PaymentInfo { Success = false, Message = "Грешка при обновяване на баланса на източника" };
             }
 
-            toAccount.AvailableAmount += payment.Amount;
-            var toAccountUpdate = new AccountUpdate { AvailableAmount = toAccount.AvailableAmount };
-            var toAccountUpdated = await _accountRepository.UpdateAsync(toAccount.AccountId, toAccountUpdate);
-            if (!toAccountUpdated)
+            var toAccount = await _accountRepository.GetAccountByNumberAsync(payment.ToAccountNumber);
+            if (toAccount != null)
             {
-                fromAccount.AvailableAmount += payment.Amount;
-                await _accountRepository.UpdateAsync(fromAccount.AccountId, fromAccountUpdate);
-                return new PaymentInfo { Success = false, Message = "Грешка при обновяване на баланса на получателя" };
+                if (!toAccount.IsActive)
+                {
+                    return new PaymentInfo { Success = false, Message = "Акаунтът на получателя не е активен" };
+                }
+                toAccount.AvailableAmount += payment.Amount;
+                var toAccountUpdate = new AccountUpdate { AvailableAmount = toAccount.AvailableAmount };
+                var toAccountUpdated = await _accountRepository.UpdateAsync(toAccount.AccountId, toAccountUpdate);
+                if (!toAccountUpdated)
+                {
+                    fromAccount.AvailableAmount += payment.Amount;
+                    await _accountRepository.UpdateAsync(fromAccount.AccountId, fromAccountUpdate);
+                    return new PaymentInfo { Success = false, Message = "Грешка при обновяване на баланса на получателя" };
+                }
             }
 
             payment.Status = PaymentStatus.Processed.ToString();
