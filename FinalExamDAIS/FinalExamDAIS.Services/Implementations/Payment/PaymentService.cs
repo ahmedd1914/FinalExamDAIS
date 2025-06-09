@@ -61,6 +61,11 @@ namespace FinalExamDAIS.Services.Implementations.Payment
                 return new PaymentInfo { Success = false, Message = "Акаунтът не е активен" };
             }
 
+            if (fromAccount.AccountNumber == createPaymentDto.ToAccountNumber)
+            {
+                return new PaymentInfo { Success = false, Message = "Не може да изпратите плащане към същия акаунт" };
+            }
+
             var userAccounts = await _accountRepository.GetAccountsByUserIdAsync(createPaymentDto.CreatedByUserId);
             if (!userAccounts.Any(a => a.AccountId == createPaymentDto.FromAccountId))
             {

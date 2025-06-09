@@ -21,11 +21,11 @@
                     <form asp-action="CreatePayment" method="post">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger fade show" role="alert"></div>
 
-                        <div class="form-floating mb-4">
+                        <div class="mb-4">
+                            <label asp-for="FromAccountId" class="form-label">Изберете акаунт</label>
                             <select asp-for="FromAccountId" class="form-select" asp-items="@(new SelectList(ViewBag.Accounts, "AccountId", "AccountNumber"))">
-                                <option value="">Изберете акаунт</option>
+                                <option value=""></option>
                             </select>
-                            <label asp-for="FromAccountId">@Html.DisplayNameFor(m => m.FromAccountId)</label>
                             <span asp-validation-for="FromAccountId" class="text-danger"></span>
                         </div>
 
