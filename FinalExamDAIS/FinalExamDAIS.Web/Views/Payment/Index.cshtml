@@ -1,0 +1,435 @@
+@model FinalExamDAIS.Web.Models.ViewModels.Payment.PaymentListViewModel
+@using FinalExamDAIS.Models.Enums
+
+@{
+    ViewData["Title"] = "Плащания";
+
+    string GetStatusText(string status)
+    {
+        return status switch
+        {
+            nameof(PaymentStatus.Pending) => "Изчаква",
+            nameof(PaymentStatus.Processed) => "Обработено",
+            nameof(PaymentStatus.Canceled) => "Отхвърлено",
+            _ => status
+        };
+    }
+
+    string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            nameof(PaymentStatus.Pending) => "status-pending",
+            nameof(PaymentStatus.Processed) => "status-processed",
+            nameof(PaymentStatus.Canceled) => "status-canceled",
+            _ => "status-default"
+        };
+    }
+}
+
+<div class="container py-5">
+    <div class="page-header mb-5">
+        <div class="d-flex align-items-center">
+            <div class="header-icon me-3">
+                <i class="fas fa-money-bill-transfer"></i>
+            </div>
+            <h2 class="mb-0">@ViewData["Title"]</h2>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+        </div>
+    }
+
+    <div class="card payment-list-card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <a asp-action="CreatePayment" class="btn btn-primary action-btn">
+                    <i class="fas fa-plus me-2"></i>Ново плащане
+                </a>
+                <div class="btn-group">
+                    <a asp-action="Index" asp-route-sortBy="date" 
+                       class="btn btn-outline-secondary @(Model.SortBy == "date" ? "active" : "")">
+                        <i class="fas fa-calendar-alt me-2"></i>По дата
+                    </a>
+                    <a asp-action="Index" asp-route-sortBy="status" 
+                       class="btn btn-outline-secondary @(Model.SortBy == "status" ? "active" : "")">
+                        <i class="fas fa-sort me-2"></i>По статус
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                @foreach (var payment in Model.Payments)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="payment-card h-100 modern-card d-flex flex-column">
+                            <div class="card-body p-4 d-flex flex-column h-100">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="payment-amount">
+                                        <span class="amount-label"><i class="fas fa-coins me-1"></i>Сума</span>
+                                        <h3 class="amount-value mb-0">@payment.Amount.ToString("N2") лв.</h3>
+                                    </div>
+                                    <span class="status-badge @GetStatusClass(payment.Status)">
+                                        <i class="fas @(payment.Status == nameof(PaymentStatus.Pending) ? "fa-clock" : 
+                                                     payment.Status == nameof(PaymentStatus.Processed) ? "fa-check-circle" : 
+                                                     "fa-times-circle") me-2"></i>
+                                        @GetStatusText(payment.Status)
+                                    </span>
+                                </div>
+
+                                <div class="payment-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label"><i class="fas fa-arrow-up-right-from-square me-1"></i>От акаунт</span>
+                                        <span class="detail-value">@payment.FromAccountNumber</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label"><i class="fas fa-arrow-down-left-from-square me-1"></i>Към акаунт</span>
+                                        <span class="detail-value">@payment.ToAccountNumber</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label"><i class="fas fa-comment-dots me-1"></i>Причина</span>
+                                        <span class="detail-value">@payment.Reason</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label"><i class="fas fa-calendar-plus me-1"></i>Дата на създаване</span>
+                                        <span class="detail-value">@payment.CreatedDate.ToString("dd.MM.yyyy HH:mm")</span>
+                                    </div>
+                                    @if (payment.ProcessedDate.HasValue)
+                                    {
+                                        <div class="detail-item">
+                                            <span class="detail-label"><i class="fas fa-calendar-check me-1"></i>Дата на обработка</span>
+                                            <span class="detail-value">@payment.ProcessedDate.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                @if (payment.Status == nameof(PaymentStatus.Pending))
+                                {
+                                    <div class="d-flex gap-2 mt-4 button-row mt-auto">
+                                        <a asp-action="ProcessPayment" asp-route-paymentId="@payment.PaymentId" 
+                                           class="btn btn-success action-btn btn-sm flex-grow-1 same-size-btn" 
+                                           onclick="return confirm('Сигурни ли сте, че искате да обработите това плащане?')">
+                                            <i class="fas fa-check me-2"></i>Обработи
+                                        </a>
+                                        <a asp-action="RejectPayment" asp-route-paymentId="@payment.PaymentId" 
+                                           class="btn btn-danger action-btn btn-sm flex-grow-1 same-size-btn" 
+                                           onclick="return confirm('Сигурни ли сте, че искате да отхвърлите това плащане?')">
+                                            <i class="fas fa-times me-2"></i>Отхвърли
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+
+        .page-header {
+            color: #2d3436;
+        }
+
+        .header-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .payment-list-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .payment-card {
+            background: #fff;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .payment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .payment-amount {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .amount-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .amount-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3436;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .status-processed {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .status-canceled {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .status-default {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+
+        .payment-details {
+            margin-top: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+            min-height: 48px;
+            justify-content: flex-start;
+        }
+
+        .detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: #2d3436;
+            font-weight: 500;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(110, 142, 251, 0.3);
+            color: white;
+        }
+
+        .btn-success.action-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .btn-danger.action-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid #6e8efb;
+            color: #6e8efb;
+            border-radius: 12px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: transparent;
+            box-sizing: border-box;
+        }
+
+        .btn-outline-secondary:hover,
+        .btn-outline-secondary.active {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border-color: #6e8efb;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(110, 142, 251, 0.3);
+        }
+
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .btn-group {
+            gap: 0.5rem;
+        }
+
+        .btn-group .btn {
+            border-radius: 12px !important;
+        }
+
+        @@media (max-width: 767.98px) {
+            .payment-card {
+                margin: 0 0.5rem;
+            }
+            .status-badge {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            .amount-value {
+                font-size: 1.5rem;
+            }
+            .detail-value {
+                font-size: 0.95rem;
+            }
+            .action-btn {
+                padding: 0.7rem 1rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        .modern-card {
+            background: rgba(255,255,255,0.85);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(110, 142, 251, 0.10), 0 2px 8px rgba(167,119,227,0.07);
+            backdrop-filter: blur(8px);
+            border-top: 5px solid #a777e3;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .modern-card:hover {
+            transform: translateY(-7px) scale(1.02);
+            box-shadow: 0 16px 40px rgba(110, 142, 251, 0.18), 0 4px 16px rgba(167,119,227,0.13);
+        }
+        .payment-details .detail-label i {
+            color: #a777e3;
+            min-width: 18px;
+        }
+        .payment-details .detail-label {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .action-btn.btn-lg {
+            font-size: 1.1rem;
+            padding: 1rem 1.5rem;
+            border-radius: 14px;
+        }
+        .btn-success.action-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: #fff;
+            border: none;
+        }
+        .btn-success.action-btn:hover {
+            background: linear-gradient(135deg, #20c997, #28a745);
+            color: #fff;
+        }
+        .btn-danger.action-btn {
+            background: linear-gradient(135deg, #dc3545, #a777e3);
+            color: #fff;
+            border: none;
+        }
+        .btn-danger.action-btn:hover {
+            background: linear-gradient(135deg, #a777e3, #dc3545);
+            color: #fff;
+        }
+        .button-row .same-size-btn {
+            flex-grow: 1;
+            width: 0;
+            min-width: 0;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        .button-row .same-size-btn > i {
+            margin-right: 0.5rem;
+        }
+        .button-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: stretch;
+        }
+        .payment-card.modern-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .payment-card .card-body {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .button-row {
+            margin-top: auto;
+        }
+        .action-btn.btn-sm {
+            font-size: 0.95rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 10px;
+        }
+    </style>
+} 

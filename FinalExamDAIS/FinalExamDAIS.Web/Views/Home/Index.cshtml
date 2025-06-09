@@ -1,8 +1,234 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model FinalExamDAIS.Web.Models.ViewModels.BankAccount.AccountListViewModel
+@{
+    ViewData["Title"] = "Моите акаунти";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-5">
+    <div class="page-header mb-5">
+        <div class="d-flex align-items-center">
+            <div class="header-icon me-3">
+                <i class="fas fa-university"></i>
+            </div>
+            <h2 class="mb-0">@ViewData["Title"]</h2>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@Model.ErrorMessage
+        </div>
+    }
+
+    @if (!Model.Accounts.Any())
+    {
+        <div class="alert alert-info fade show" role="alert">
+            <i class="fas fa-info-circle me-2"></i>Все още нямате акаунти.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var account in Model.Accounts)
+            {
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="account-card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="account-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <span class="status-badge @(account.IsActive ? "active" : "inactive")">
+                                    <i class="fas @(account.IsActive ? "fa-check-circle" : "fa-times-circle") me-2"></i>
+                                    @(account.IsActive ? "Активен" : "Неактивен")
+                                </span>
+                            </div>
+                            <div class="account-number mb-4">
+                                #@account.AccountNumber
+                            </div>
+                            <div class="balance-info mb-4">
+                                <label>Налична сума</label>
+                                <p class="balance-amount">@account.AvailableAmount.ToString("N2") лв.</p>
+                            </div>
+                            <div class="d-grid gap-2 mt-auto">
+                                <a href="@Url.Action("AccountDetails", "Home", new { id = account.AccountId })" 
+                                   class="btn btn-details action-btn">
+                                    <i class="fas fa-eye me-2"></i>Детайли
+                                </a>
+                                <a href="@Url.Action("CreatePayment", "Payment", new { fromAccountId = account.AccountId })" 
+                                   class="btn btn-payment action-btn">
+                                    <i class="fas fa-money-bill-transfer me-2"></i>Ново плащане
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
+
+@section Styles {
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+
+        .page-header {
+            color: #2d3436;
+        }
+
+        .header-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .account-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .account-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(110, 142, 251, 0.2);
+        }
+
+        .account-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .status-badge.active {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .status-badge.inactive {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .account-number {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-info label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .balance-amount {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3436;
+            margin: 0;
+        }
+
+        .action-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #fff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-details.action-btn {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+        }
+
+        .btn-details.action-btn:hover {
+            background: linear-gradient(135deg, #5d7de9, #9666d2);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .btn-payment.action-btn {
+            background: linear-gradient(135deg, #fca311, #f39c12);
+            color: #fff;
+        }
+
+        .btn-payment.action-btn:hover {
+            background: linear-gradient(135deg, #e59410, #e28c10);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .alert-info {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+
+        @@media (max-width: 767.98px) {
+            .account-card {
+                margin: 0 0.5rem;
+            }
+            .card-body {
+                padding: 1.5rem !important;
+            }
+            .balance-amount {
+                font-size: 1.5rem;
+            }
+            .action-btn {
+                padding: 0.7rem;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+}

@@ -1,75 +1,199 @@
 @model FinalExamDAIS.Web.Models.ViewModels.Account.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Регистрация";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2 class="text-center mb-4">@ViewData["Title"]</h2>
-        <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Username" class="form-label"></label>
-                <input asp-for="Username" class="form-control" placeholder="Choose a username" />
-                <span asp-validation-for="Username" class="text-danger"></span>
-                <small class="form-text text-muted">Username must be between 3-50 characters and contain only letters and numbers.</small>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" type="email" placeholder="Enter your email" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-                <small class="form-text text-muted">Please enter a valid email address.</small>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" type="password" placeholder="Create a password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-                <small class="form-text text-muted">Password must be at least 8 characters with uppercase, lowercase, number and special character.</small>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group mb-3">
-                        <label asp-for="FirstName" class="form-label"></label>
-                        <input asp-for="FirstName" class="form-control" placeholder="Enter first name" />
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow-lg border-0 rounded-4 register-card mx-auto">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <div class="avatar-circle mb-3 mx-auto">
+                        <i class="fas fa-user-plus fa-3x"></i>
+                    </div>
+                    <h2 class="fw-bold">@ViewData["Title"]</h2>
+                    <p class="text-muted">Създайте своя акаунт</p>
+                </div>
+
+                <form asp-action="Register" method="post" class="needs-validation" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="Username" class="form-control" placeholder=" " />
+                        <label asp-for="Username">Потребителско име</label>
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="Email" class="form-control" type="email" placeholder=" " />
+                        <label asp-for="Email">Имейл</label>
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="Password" class="form-control" type="password" placeholder=" " />
+                        <label asp-for="Password">Парола</label>
+                        <span asp-validation-for="Password" class="text-danger"></span> 
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="FirstName" class="form-control" placeholder=" " />
+                        <label asp-for="FirstName">Име</label>
                         <span asp-validation-for="FirstName" class="text-danger"></span>
-                        <small class="form-text text-muted">First name must be between 2-50 characters.</small>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group mb-3">
-                        <label asp-for="LastName" class="form-label"></label>
-                        <input asp-for="LastName" class="form-control" placeholder="Enter last name" />
+                    <div class="form-floating mb-3">
+                        <input asp-for="LastName" class="form-control" placeholder=" " />
+                        <label asp-for="LastName">Фамилия</label>
                         <span asp-validation-for="LastName" class="text-danger"></span>
-                        <small class="form-text text-muted">Last name must be between 2-50 characters.</small>
                     </div>
+                    
+                    <div class="form-floating mb-4">
+                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                        <label asp-for="DateOfBirth">Дата на раждане</label>
+                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-register btn-lg w-100 mb-3">
+                        <i class="fas fa-user-plus me-2"></i>Регистрация
+                    </button>
+                </form>
+                
+                <div class="text-center">
+                    <p class="mb-0">
+                        Вече имате акаунт? 
+                        <a asp-action="Login" class="login-link">
+                            Влезте тук
+                        </a>
+                    </p>
                 </div>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="DateOfBirth" class="form-label"></label>
-                <input asp-for="DateOfBirth" class="form-control" type="date" />
-                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
-                <small class="form-text text-muted">Please enter your date of birth.</small>
-            </div>
-            
-            <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary">Register</button>
-            </div>
-        </form>
-        
-        <div class="text-center mt-3">
-            <p>
-                Already have an account? <a asp-action="Login">Login here</a>
-            </p>
         </div>
     </div>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@section Styles {
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .register-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+        .register-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(110, 142, 251, 0.2);
+        }
+        .avatar-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(110, 142, 251, 0.2);
+        }
+        .form-floating > .form-control {
+            padding: 1rem 0.75rem;
+            height: calc(3.5rem + 2px);
+            line-height: 1.25;
+            border-radius: 12px;
+            border: 1.5px solid #e5e5e5;
+            color: #2d3436;
+            background: #fff;
+            font-size: 1rem;
+        }
+        .form-floating > label {
+            padding: 1rem 0.75rem;
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+        .form-control:focus {
+            border-color: #6e8efb;
+            box-shadow: 0 0 0 0.2rem rgba(110, 142, 251, 0.15);
+            color: #2d3436;
+        }
+        .btn-register {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-register:hover {
+            background: linear-gradient(135deg, #5d7de9, #9666d2);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(110, 142, 251, 0.3);
+        }
+        .login-link {
+            color: #6e8efb;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .login-link:hover {
+            color: #a777e3;
+            text-decoration: underline;
+        }
+        .alert {
+            border-radius: 12px;
+            border: none;
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            padding: 1rem 1.5rem;
+        }
+        .text-danger {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        input[type="date"] {
+            color-scheme: light;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.5);
+        }
+        h2 {
+            color: #2d3436;
+        }
+        .text-muted {
+            color: #6c757d !important;
+        }
+        @@media (max-width: 767.98px) {
+            .register-card {
+                margin: 1rem;
+            }
+            .card-body {
+                padding: 1.5rem !important;
+            }
+            .btn-register {
+                padding: 0.7rem;
+                font-size: 0.95rem;
+            }
+            .row {
+                margin: 0;
+            }
+            .col-md-6 {
+                padding: 0;
+            }
+            .form-floating {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
 }

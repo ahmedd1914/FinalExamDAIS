@@ -1,56 +1,69 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FinalExamDAIS.Web</title>
+    <title>@ViewData["Title"] - Онлайн Банкиране</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/FinalExamDAIS.Web.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     @{
         var isLoggedIn = Context.Session.GetInt32("UserId") != null;
         var userName = Context.Session.GetString("UserName");
     }
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm custom-navbar border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FinalExamDAIS.Web</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-university"></i> <span class="brand-text">Онлайн Банкиране</span>
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
+                        @if (isLoggedIn)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                    <i class="fas fa-home"></i> Начало
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="Index">
+                                    <i class="fas fa-history"></i> Плащания
+                                </a>
+                            </li>
+                        }
                     </ul>
                     <ul class="navbar-nav">
                         @if (isLoggedIn)
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fas fa-user-circle"></i> @userName
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
                                         <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile">
-                                            <i class="fas fa-user"></i> Profile
+                                            <i class="fas fa-user"></i> Профил
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Settings">
-                                            <i class="fas fa-cog"></i> Settings
+                                            <i class="fas fa-cog"></i> Настройки
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">
-                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                            <i class="fas fa-sign-out-alt"></i> Изход
                                         </a>
                                     </li>
                                 </ul>
@@ -59,13 +72,13 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">
-                                    <i class="fas fa-sign-in-alt"></i> Login
+                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">
+                                    <i class="fas fa-sign-in-alt"></i> Вход
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">
-                                    <i class="fas fa-user-plus"></i> Register
+                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Register">
+                                    <i class="fas fa-user-plus"></i> Регистрация
                                 </a>
                             </li>
                         }
@@ -74,15 +87,14 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container main-content-bg flex-grow-1">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
-
-    <footer class="border-top footer text-muted">
+    <footer class="footer-custom text-muted mt-auto">
         <div class="container">
-            &copy; 2025 - FinalExamDAIS.Web - <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+            &copy; @DateTime.Now.Year - Онлайн Банкиране - <a asp-area="" asp-controller="Home" asp-action="Index">Начало</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -91,3 +103,111 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+    .main-content-bg {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .custom-navbar {
+        background: linear-gradient(135deg, #6e8efb, #a777e3) !important;
+        border-bottom: none;
+        box-shadow: 0 2px 15px rgba(110, 142, 251, 0.2);
+    }
+    .navbar-brand, .brand-text {
+        color: white !important;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    .navbar-nav .nav-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-weight: 500;
+        padding: 0.5rem 1.2rem !important;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    .navbar-nav .nav-link.active, 
+    .navbar-nav .nav-link:focus, 
+    .navbar-nav .nav-link:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
+        backdrop-filter: blur(5px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 0.5rem;
+    }
+    .dropdown-item {
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+        color: #2d3436;
+        border-radius: 8px;
+        margin: 0.2rem 0;
+    }
+    .dropdown-item:hover, 
+    .dropdown-item:focus {
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        color: white;
+        transform: translateX(5px);
+    }
+    .dropdown-divider {
+        margin: 0.5rem 0;
+        border-color: rgba(0,0,0,0.1);
+    }
+    .footer-custom {
+        padding: 1.5rem 0;
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        color: white;
+        border-top: none;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+        box-shadow: 0 -2px 15px rgba(110, 142, 251, 0.2);
+    }
+    .footer-custom a {
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        opacity: 0.9;
+    }
+    .footer-custom a:hover {
+        color: white;
+        opacity: 1;
+        text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+    .navbar-toggler {
+        border: none;
+        padding: 0.5rem;
+        color: white;
+    }
+    .navbar-toggler:focus {
+        box-shadow: none;
+    }
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+    @@media (max-width: 767.98px) {
+        .main-content-bg {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+        .navbar-nav .nav-link {
+            padding: 0.75rem 1rem !important;
+        }
+        .dropdown-menu {
+            background: rgba(255, 255, 255, 0.98);
+        }
+    }
+</style>

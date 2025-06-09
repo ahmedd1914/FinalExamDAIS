@@ -1,50 +1,174 @@
 @model FinalExamDAIS.Web.Models.ViewModels.Account.LoginViewModel
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Вход";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-4">
-        <h2 class="text-center mb-4">@ViewData["Title"]</h2>
-        <form asp-action="Login" method="post">
-            <input type="hidden" asp-for="ReturnUrl" />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Username" class="form-label"></label>
-                <input asp-for="Username" class="form-control" placeholder="Enter your username" />
-                <span asp-validation-for="Username" class="text-danger"></span>
-                <small class="form-text text-muted">Username must be between 3-50 characters and contain only letters and numbers.</small>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" placeholder="Enter your password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-                <small class="form-text text-muted">Password must be at least 8 characters with uppercase, lowercase, number and special character.</small>
-            </div>
-            
-            <div class="form-group mb-3">
-                <div class="form-check">
-                    <input asp-for="RememberMe" class="form-check-input" />
-                    <label asp-for="RememberMe" class="form-check-label">Keep me signed in</label>
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+        <div class="card shadow-lg border-0 rounded-4 login-card mx-auto">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <div class="avatar-circle mb-3 mx-auto">
+                        <i class="fas fa-user-circle fa-3x"></i>
+                    </div>
+                    <h2 class="fw-bold">@ViewData["Title"]</h2>
+                    <p class="text-muted">Добре дошли отново!</p>
+                </div>
+
+                <form asp-action="Login" method="post" class="needs-validation" novalidate>
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="Username" class="form-control" placeholder=" " />
+                        <label asp-for="Username">Потребителско име</label>
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="Password" class="form-control" placeholder=" " />
+                        <label asp-for="Password">Парола</label>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-check mb-4">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label">Запомни ме</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-login btn-lg w-100 mb-3">
+                        <i class="fas fa-sign-in-alt me-2"></i>Вход
+                    </button>
+                </form>
+                
+                <div class="text-center">
+                    <p class="mb-0">
+                        Нямате акаунт? 
+                        <a asp-action="Register" class="register-link">
+                            Регистрирайте се тук
+                        </a>
+                    </p>
                 </div>
             </div>
-            
-            <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary">Login</button>
-            </div>
-        </form>
-        
-        <div class="text-center mt-3">
-            <p>
-                Don't have an account? <a asp-action="Register">Register here</a>
-            </p>
         </div>
     </div>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@section Styles {
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(110, 142, 251, 0.2);
+        }
+        .avatar-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(110, 142, 251, 0.2);
+        }
+        .form-floating > .form-control {
+            padding: 1rem 0.75rem;
+            height: calc(3.5rem + 2px);
+            line-height: 1.25;
+            border-radius: 12px;
+            border: 1.5px solid #e5e5e5;
+            color: #2d3436;
+            background: #fff;
+            font-size: 1rem;
+        }
+        .form-floating > label {
+            padding: 1rem 0.75rem;
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+        .form-control:focus {
+            border-color: #6e8efb;
+            box-shadow: 0 0 0 0.2rem rgba(110, 142, 251, 0.15);
+            color: #2d3436;
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-login:hover {
+            background: linear-gradient(135deg, #5d7de9, #9666d2);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(110, 142, 251, 0.3);
+        }
+        .register-link {
+            color: #6e8efb;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .register-link:hover {
+            color: #a777e3;
+            text-decoration: underline;
+        }
+        .alert {
+            border-radius: 12px;
+            border: none;
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            padding: 1rem 1.5rem;
+        }
+        .text-danger {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        .form-check-input:checked {
+            background-color: #6e8efb;
+            border-color: #6e8efb;
+        }
+        .form-check-label {
+            color: #6c757d;
+        }
+        h2 {
+            color: #2d3436;
+        }
+        .text-muted {
+            color: #6c757d !important;
+        }
+        @@media (max-width: 767.98px) {
+            .login-card {
+                margin: 1rem;
+            }
+            .card-body {
+                padding: 1.5rem !important;
+            }
+            .btn-login {
+                padding: 0.7rem;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
 }

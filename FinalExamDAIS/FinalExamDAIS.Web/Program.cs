@@ -1,8 +1,16 @@
 using FinalExamDAIS.Repository;
+using FinalExamDAIS.Repository.Implementations.Account;
 using FinalExamDAIS.Repository.Implementations.User;
 using FinalExamDAIS.Repository.Interfaces.User;
+using FinalExamDAIS.Services.Implementations.Account;
 using FinalExamDAIS.Services.Implementations.Authentication;
+using FinalExamDAIS.Services.Interfaces.Account;
 using FinalExamDAIS.Services.Interfaces.Authentication;
+using FinalExamDAIS.Repository.Interfaces.Account;
+using FinalExamDAIS.Repository.Interfaces.Payment;
+using FinalExamDAIS.Repository.Implementations.Payment;
+using FinalExamDAIS.Services.Interfaces.Payment;
+using FinalExamDAIS.Services.Implementations.Payment;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +24,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddSingleton(connectionString);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddSession(options =>
 {

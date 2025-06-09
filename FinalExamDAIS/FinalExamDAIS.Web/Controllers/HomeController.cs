@@ -1,26 +1,64 @@
 using System.Diagnostics;
 using FinalExamDAIS.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using FinalExamDAIS.Services.Interfaces.Account;
+using FinalExamDAIS.Web.Models.ViewModels.BankAccount;
+using FinalExamDAIS.Web.Attributes;
 
 namespace FinalExamDAIS.Web.Controllers
 {
+    [Authorize]
     public class HomeController : BaseController
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IAccountService _accountService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IAccountService accountService)
         {
-            _logger = logger;
+            _accountService = accountService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            try
+            {
+                var requiredUserId = RequireUserId();
+                if (requiredUserId != null) return requiredUserId;
+
+                var userId = GetUserId().Value;
+                var viewModel = new AccountListViewModel();
+                var accounts = await _accountService.GetAccountsByUserIdAsync(userId);
+                viewModel.Accounts = accounts.Accounts;
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            }
         }
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> AccountDetails(int id)
         {
-            return View();
+            try
+            {
+                var requiredUserId = RequireUserId();
+                if (requiredUserId != null) return requiredUserId;
+
+                var viewModel = new AccountDetailsViewModel();
+                var account = await _accountService.GetAccountByIdAsync(id);
+                
+                if (account == null)
+                {
+                    viewModel.ErrorMessage = "Account not found";
+                    return View(viewModel);
+                }
+
+                viewModel.Account = account;
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
